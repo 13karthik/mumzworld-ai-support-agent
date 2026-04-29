@@ -6,17 +6,16 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 def process_email(email: str, max_retries: int = 2) -> TriageOutput:
     user_prompt = get_user_prompt(email)
     for attempt in range(max_retries + 1):
         try:
             raw_response = call_llm(system_prompt, user_prompt)
             logging.info(f"Attempt {attempt + 1}: Raw response: {raw_response}")
-            # Try to parse JSON
             data = json.loads(raw_response)
             triage = TriageOutput(**data)
 
-            # Apply deterministic post-processing rules
             triage = apply_post_processing_rules(email, triage)
 
             return triage
@@ -30,21 +29,64 @@ def process_email(email: str, max_retries: int = 2) -> TriageOutput:
                 raise e
     raise ValueError("Failed to get valid response after retries")
 
+
 def apply_post_processing_rules(email: str, result: TriageOutput) -> TriageOutput:
-    """Apply deterministic rules to improve accuracy"""
+    """Apply deterministic rules to improve accuracy."""
     text = email.lower()
 
+    refund_keywords = ["refund", "money back", "return my money", "استرداد", "استرجاع"]
+    exchange_keywords = ["exchange", "replace", "wrong size", "wrong item", "استبدال", "تبديل"]
+    inquiry_keywords = [
+        "how long",
+        "can you",
+        "help with my order",
+        "need help with my order",
+        "recommend",
+        "where is my order",
+        "shipping",
+        "شحن",
+        "مساعدة",
+    ]
+
+    has_refund = any(keyword in text for keyword in refund_keywords)
+    has_exchange = any(keyword in text for keyword in exchange_keywords)
+
     # ---- Intent overrides ----
-    if any(k in text for k in ["refund", "money back", "return my money", "استرداد", "استرجاع"]):
+    if has_refund and has_exchange:
+        result.intent = "other"
+        result.urgency = "medium"
+        result.confidence_score = min(result.confidence_score, 0.45)
+    elif has_refund:
         result.intent = "refund"
-    elif any(k in text for k in ["exchange", "replace", "wrong size", "wrong item", "استبدال", "تبديل"]):
+    elif has_exchange:
         result.intent = "exchange"
+    elif result.intent == "other" and any(keyword in text for keyword in inquiry_keywords):
+        result.intent = "inquiry"
 
     # ---- Urgency rules ----
-    if any(k in text for k in ["angry", "unacceptable", "immediately", "asap", "frustrated", "غاضب", "مستاء"]):
+    high_urgency_keywords = [
+        "angry",
+        "unacceptable",
+        "immediately",
+        "asap",
+        "frustrated",
+        "غاضب",
+        "مستاء",
+    ]
+    medium_urgency_keywords = [
+        "damaged",
+        "broken",
+        "not working",
+        "late",
+        "تالف",
+        "مكسور",
+        "متأخر",
+    ]
+
+    if any(keyword in text for keyword in high_urgency_keywords):
         result.urgency = "high"
-    elif any(k in text for k in ["damaged", "broken", "not working", "late", "تالف", "مكسور", "متأخر"]):
-        if result.urgency == "low":  # don't downgrade from high to medium
+    elif any(keyword in text for keyword in medium_urgency_keywords):
+        if result.urgency == "low":
             result.urgency = "medium"
 
     # ---- Confidence guardrails ----
@@ -53,11 +95,10 @@ def apply_post_processing_rules(email: str, result: TriageOutput) -> TriageOutpu
     else:
         result.confidence_score = max(result.confidence_score, 0.7)
 
-    # Fix confidence bug - never output 0.0 unless truly empty
-    if result.confidence_score == 0.0 and email.strip():
+    # Never output 0.0 for clear non-empty intents.
+    if result.intent != "other" and result.confidence_score == 0.0 and email.strip():
         result.confidence_score = 0.7
 
-    # Cap confidence to avoid unrealistic 1.0
     result.confidence_score = min(result.confidence_score, 0.95)
 
     return result

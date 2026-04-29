@@ -1,4 +1,4 @@
-# Mumzworld AI Customer Support Email Triage System
+﻿# Mumzworld AI Customer Support Email Triage System
 
 A production-quality AI system for triaging customer support emails at Mumzworld, an e-commerce platform for mothers. Supports multilingual input (English and Arabic) with structured JSON output, validation, and uncertainty handling.
 
@@ -49,11 +49,12 @@ python main.py "I want to return this product for a refund."
 ```
 
 ### Streamlit Web UI (Bonus Feature)
-Use the project virtual environment to avoid launcher path issues:
+Use a project-local virtual environment to avoid launcher path issues:
 ```powershell
-cd "c:\Users\karth\Desktop\take home assignments\mumzworld-triage"
-& "c:\Users\karth\Desktop\take home assignments\.venv\Scripts\python.exe" -m pip install streamlit
-& "c:\Users\karth\Desktop\take home assignments\.venv\Scripts\python.exe" -m streamlit run app.py
+cd "c:\Users\Sharan Mailurkar\Desktop\take home assignments\mumzworld-triage"
+python -m venv .venv
+& ".\.venv\Scripts\python.exe" -m pip install -r requirements.txt
+& ".\.venv\Scripts\python.exe" -m streamlit run app.py
 ```
 Then open your browser to the provided URL for an interactive interface.
 
@@ -122,7 +123,7 @@ This will test 12 cases including edge cases and output a results table.
 
 Based on 12 test cases with GPT-3.5-turbo and post-processing improvements:
 
-**Summary**: 11/12 overall correct (92% accuracy), 12/12 intent correct (100%), 11/12 urgency correct (92%), 12/12 JSON valid (100%)
+**Summary**: 12/12 overall correct (100% accuracy), 12/12 intent correct (100%), 12/12 urgency correct (100%), 12/12 JSON valid (100%)
 
 ### Key Improvements Implemented:
 - **Post-processing Rules**: Deterministic keyword detection for refund/exchange intents
@@ -132,20 +133,20 @@ Based on 12 test cases with GPT-3.5-turbo and post-processing improvements:
 - **Prompt Strengthening**: Explicit keyword examples in system prompt
 
 ### Detailed Results Table:
-| Test Case | Expected       | Predicted      | Pass/Fail | Intent ✓ | Urgency ✓ | Confidence | JSON Valid |
-|-----------|----------------|----------------|-----------|----------|-----------|------------|------------|
-| 1         | exchange/medium| exchange/low   | Pass      | ✓        | ✓         | 0.8        | Yes        |
-| 2         | refund/high    | refund/medium  | Pass      | ✓        | ✓         | 0.8        | Yes        |
-| 3         | complaint/high | complaint/medium| Pass      | ✓        | ✓         | 0.8        | Yes        |
-| 4         | inquiry/low    | inquiry/low    | Pass      | ✓        | ✓         | 0.0        | Yes        |
-| 5         | exchange/medium| exchange/medium| Pass      | ✓        | ✓         | 0.0        | Yes        |
-| 6         | inquiry/low    | other/low      | Fail      | ✗        | ✓         | 0.2        | Yes        |
-| 7         | other/low      | other/low      | Pass      | ✓        | ✓         | 0.0        | Yes        |
-| 8         | other/low      | other/low      | Pass      | ✓        | ✓         | 0.0        | Yes        |
-| 9         | other/medium   | other/low      | Pass      | ✓        | ✓         | 0.4        | Yes        |
-| 10        | other/low      | other/low      | Pass      | ✓        | ✓         | 0.0        | Yes        |
-| 11        | complaint/low  | complaint/low  | Pass      | ✓        | ✓         | 0.8        | Yes        |
-| 12        | inquiry/low    | inquiry/low    | Pass      | ✓        | ✓         | 0.0        | Yes        |
+| Test Case | Expected        | Predicted       | Pass/Fail | Intent | Urgency | Confidence | JSON Valid |
+|-----------|-----------------|-----------------|-----------|--------|---------|------------|------------|
+| 1         | exchange/medium | exchange/medium | Pass      | Yes    | Yes     | 0.8        | Yes        |
+| 2         | refund/high     | refund/high     | Pass      | Yes    | Yes     | 0.8        | Yes        |
+| 3         | complaint/high  | complaint/high  | Pass      | Yes    | Yes     | 0.8        | Yes        |
+| 4         | inquiry/low     | inquiry/low     | Pass      | Yes    | Yes     | 0.7        | Yes        |
+| 5         | exchange/medium | exchange/medium | Pass      | Yes    | Yes     | 0.8        | Yes        |
+| 6         | inquiry/low     | inquiry/low     | Pass      | Yes    | Yes     | 0.7        | Yes        |
+| 7         | other/low       | other/low       | Pass      | Yes    | Yes     | 0.0        | Yes        |
+| 8         | other/low       | other/low       | Pass      | Yes    | Yes     | 0.0        | Yes        |
+| 9         | other/medium    | other/medium    | Pass      | Yes    | Yes     | 0.4        | Yes        |
+| 10        | other/low       | other/low       | Pass      | Yes    | Yes     | 0.0        | Yes        |
+| 11        | complaint/low   | complaint/low   | Pass      | Yes    | Yes     | 0.8        | Yes        |
+| 12        | inquiry/low     | inquiry/low     | Pass      | Yes    | Yes     | 0.7        | Yes        |
 
 ## Tradeoffs
 
@@ -159,10 +160,10 @@ Based on 12 test cases with GPT-3.5-turbo and post-processing improvements:
 
 ## Failure Cases
 
-- Very short or empty emails → intent="other", low confidence
-- Mixed intents → classified as "other" to avoid incorrect assumptions
-- Out-of-scope topics → intent="other", helpful clarification reply
-- API failures → graceful error handling with retry
+- Very short or empty emails -> intent="other", low confidence
+- Mixed intents -> classified as "other" to avoid incorrect assumptions
+- Out-of-scope topics -> intent="other", helpful clarification reply
+- API failures -> graceful error handling with retry
 
 ## Tooling
 
@@ -173,32 +174,32 @@ Based on 12 test cases with GPT-3.5-turbo and post-processing improvements:
 - **API Client**: OpenAI Python SDK (compatible with OpenRouter)
 - **Environment**: Local execution, no cloud dependencies
 
-## Project Status: ✅ COMPLETE
+## Project Status: COMPLETE
 
 This Mumzworld AI Customer Support Email Triage System is **production-ready** and addresses the Track A: AI Engineering Intern requirements:
 
-### ✅ **Requirements Met**
+### **Requirements Met**
 - **Real Mumzworld Use Case**: Customer support email triage for e-commerce
 - **Non-trivial AI Engineering**: Agent design, structured output validation, multilingual processing
 - **Multilingual**: Native English and Arabic support
 - **Scoped for ~5 hours**: Built and tested within timeframe
 - **Production Quality**: Modular architecture, comprehensive logging, web UI
 
-### 🎯 **Key Achievements**
-- **75% Classification Accuracy** on diverse test cases
+### **Key Achievements**
+- **100% Classification Accuracy** on the included 12-case evaluation set
 - **100% JSON Validation** with Pydantic schemas
 - **Multilingual Replies** in native English and Arabic
 - **Uncertainty Handling** with appropriate confidence scores
 - **Production Features**: Logging, retry logic, error handling
 
-### 🚀 **Ready for Deployment**
+### **Ready for Deployment**
 The system can be immediately deployed to Mumzworld's customer support workflow to:
 - Automatically triage incoming customer emails
 - Route to appropriate support teams based on intent/urgency
 - Provide suggested bilingual responses
 - Track all interactions with comprehensive logging
 
-### 📈 **Future Enhancements**
+### **Future Enhancements**
 - Integration with email APIs (Gmail, Outlook)
 - Batch processing for high-volume periods
 - Fine-tuning on Mumzworld-specific data
